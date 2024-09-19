@@ -239,6 +239,62 @@
             z-index: 10001;
         }
 
+        .announcement {
+            display: none;
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: red;
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            z-index: 1002;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            font-size: 1.2em;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        .countdown {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 1em;
+        }
+
+        .confirm-button {
+            background-color: #ffffff;
+            color: #8533f1;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1em;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .confirm-button:hover {
+            background-color: #f0f0f0;
+            transform: translateY(-2px);
+        }
+
+        .countdown-global {
+            display: none;
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            z-index: 1003;
+        }
+
         @media (max-width: 600px) {
             .app-name {
                 font-size: 1.5em;
@@ -250,6 +306,9 @@
             .theme-icon {
                 width: 30px;
                 height: 30px;
+            }
+            .announcement {
+                font-size: 1em;
             }
         }
     </style>
@@ -323,10 +382,21 @@
         </div>
     </div>
 
+    <div class="announcement" id="announcement">
+        <div class="countdown" id="countdown"></div>
+        <p>O site está programado para fechar dia 25 de setembro. Aproveitem e façam suas atividades que estão faltando!</p>
+        <button class="confirm-button" onclick="closeAnnouncement()">Ok, estou ciente</button>
+    </div>
+
+    <div class="countdown-global" id="countdownGlobal"></div>
+
     <script>
         const themeOptions = document.getElementById('themeOptions');
         const hueRange = document.getElementById('hueRange');
         const offlineMessage = document.getElementById('offlineMessage');
+        const announcement = document.getElementById('announcement');
+        const countdownElement = document.getElementById('countdown');
+        const countdownGlobal = document.getElementById('countdownGlobal');
 
         function toggleThemeOptions() {
             themeOptions.style.display = themeOptions.style.display === 'flex' ? 'none' : 'flex';
@@ -395,13 +465,6 @@
             setButtonWidth(storedWidth);
         }
 
-        window.onload = () => {
-            applyStoredTheme();
-            applyStoredButtonSize();
-            applyStoredButtonWidth();
-            checkConnectionStatus();
-        };
-
         function checkConnectionStatus() {
             if (!navigator.onLine) {
                 offlineMessage.style.display = 'block';
@@ -417,6 +480,45 @@
                 offlineMessage.style.display = 'block';
             });
         }
+
+        function closeAnnouncement() {
+            announcement.style.display = 'none';
+            countdownGlobal.style.display = 'block';
+        }
+
+        function startCountdown() {
+            const closingDate = new Date('September 25, 2024 00:00:00').getTime();
+            const interval = setInterval(() => {
+                const now = new Date().getTime();
+                const distance = closingDate - now;
+
+                if (distance < 0) {
+                    clearInterval(interval);
+                    countdownElement.innerHTML = "O aplicativo está fechado.";
+                    countdownGlobal.innerHTML = "O aplicativo está fechado.";
+                    return;
+                }
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                const countdownText = `Tempo restante: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+                countdownElement.innerHTML = countdownText;
+                countdownGlobal.innerHTML = countdownText;
+            }, 1000);
+        }
+
+        window.onload = () => {
+            applyStoredTheme();
+            applyStoredButtonSize();
+            applyStoredButtonWidth();
+            checkConnectionStatus();
+
+            announcement.style.display = 'block';
+            startCountdown();
+        };
     </script>
 </body>
 </html>
